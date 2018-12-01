@@ -1,4 +1,4 @@
-[1130]
+﻿[1130]
 
 DB 구현 상황 확인
 - 변수명 structure 확인 (톡방에 사진 확인)
@@ -74,3 +74,5 @@ db - finished creating db; jsp파일 연동하는 부분 by 인하
 2. 몇개의 MainFrame이 필요한지 생각하기
 
 3. MainFrame html 파일 각자 만들기
+
+>>> roles.txt 참고
