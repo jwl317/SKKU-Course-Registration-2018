@@ -1,0 +1,43 @@
+학교 수강사이트
+탭 프레임:
+>>> tab.css
+
+메인 프레임: 상위 탭과 사이드 바를 제외한 나머지 바디 프레임
+	css menu를 따로 만들어서 적용해서 사용하고 있다
+	>>> style.css //<head>, <iframe> 탭, 사이드, 메인 다 포함한 전체 프레임, <frame> 사이드 제외하고 탭과 메인만 포함한 프레임,  
+	>>> ui.jqgrid.css
+
+	그리고 jQuery를 기본으로 하면서 뷰를 표현하는 다양한 컴포넌트, 위젯을 모아서 정리한 UI 도 사용하고 있다
+	더 자세한 사항은 http://jqueryui.com 참고한다
+	>>> jquery-ui-1.9.2.custom.min.css
+	>>> jquery.jqGrid.min.js
+
+대다수 "구글 폰트 적용"했는데, 정확히 어떤 폰트인지 잘 모르겠다
+font-family 가 다 깨져서 보인다
+아마도 "Trebuchet MS", sans-serif
+
+
+1. css menu를 따로 만들어 적용
+	<link rel="StyleSheet" href="/skku/html/css/style.css" type="text/css" title="myCSS">
+	<link rel="stylesheet" type="text/css" href="/skku/html/css/tab.css">
+	<link rel="stylesheet" href="/skku/html/css/redmond/jquery-ui-1.9.2.custom.min.css">
+
+2. jqGrid 는 jQuery UI 테마랑 연동이 되는거 같다
+무료 그리드중에서는 jqGrid가 유명한거 
+jqGrid API 문서겸 데모페이지 제공 기능들이 엄청나다
+샘플링으로 jqGrid에서 데모와 소스를 제공
+>>>	http://trirand.com/blog/jqgrid/jqgrid.html
+
+출처: http://roqkffhwk.tistory.com/43 [야근싫어하는 개발자]
+
+
+3. jQueryUI는 jQuery를 기본으로 하면서 뷰를 표현하는 다양한 컴포넌트, 위젯을 모아놓은 User Interface를 모아 놓은 것
+jQuery UI is a curated set of user interface interactions, effects, widgets, and themes built on top of the jQuery JavaScript Library.
+
+	<script language="JavaScript" src="/skku/html/js/jquery-1.8.3.js"></script>
+	<script src="/skku/html/js/jquery-ui-1.9.2.custom.min.js"></script>
+
+출처: http://mobicon.tistory.com/376 [Intelligence Data Visualization]
+
+
+
