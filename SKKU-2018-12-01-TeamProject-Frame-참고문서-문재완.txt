@@ -1,0 +1,27 @@
+<frameset 속성 = "값" 속성 = "값" ...>
+	<frame src = "url" 속성 = "값" 속성 = "값" ...>
+	<frame src = "url" 속성 = "값" 속성 = "값" ...>
+</frameset>
+
+으로 표현.
+frameset은 한 화면을 어떻게 나눌지를 결정
+
+frameset 속성
+rows
+cols
+frameborder
+border
+framespacing -> 프레임 간격
+bordercolor
+
+frame 속성
+src
+name <- 프레임 이름
+frameborder
+border
+scrolling <- auto, yes, no
+marginheight
+marginwidth
+
+프레임 설정에 관한 예시
+https://m.blog.naver.com/PostView.nhn?blogId=sonicheroes1&logNo=220676087456&proxyReferer=https%3A%2F%2Fwww.google.co.kr%2F
