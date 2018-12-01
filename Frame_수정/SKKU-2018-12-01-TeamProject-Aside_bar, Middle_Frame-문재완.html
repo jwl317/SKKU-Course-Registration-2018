@@ -1,0 +1,170 @@
+<html style="height: 100%; overflow: hidden;"><head>
+	<meta charset="utf-8">
+	<title>Frame</title>
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<link rel="stylesheet" href="/skku/html/css/style.css" type="text/css">
+	<style type="text/css">
+	/**
+	 *	Basic Layout Theme
+	 */
+	.ui-layout-pane { /* all 'panes' */ 
+		border: 1px solid #BBB; 
+	} 
+	.ui-layout-pane-center { /* IFRAME pane */ 
+		padding: 0;
+		margin:  0;
+	} 
+	.ui-layout-pane-west { /* west pane */ 
+		padding: 0 10px; 
+		background-color: #FFF !important;
+		overflow: auto;
+	} 
+
+	.ui-layout-resizer { /* all 'resizer-bars' */ 
+		background: #DDD; 
+		} 
+		.ui-layout-resizer-open:hover { /* mouse-over */
+			background: #9D9; 
+		}
+
+	.ui-layout-toggler { /* all 'toggler-buttons' */ 
+		background: #AAA; 
+		} 
+		.ui-layout-toggler-closed { /* closed toggler-button */ 
+			background: #CCC; 
+			border-bottom: 1px solid #BBB; 
+		} 
+		.ui-layout-toggler .content { /* toggler-text */ 
+			font: 14px bold Verdana, Verdana, Arial, Helvetica, sans-serif;
+		}
+		.ui-layout-toggler:hover { /* mouse-over */ 
+			background: #DCA; 
+			} 
+			.ui-layout-toggler:hover .content { /* mouse-over */ 
+				color: #009; 
+				}
+
+	/* class to make the 'draggable iframe mask' visible */
+	div.ui-draggable-iframeFix {
+		opacity: 0.2 !important;
+		filter:	 alpha(opacity=20) !important;
+		background-color: #666 !important;
+	}
+
+
+	body {
+		background-color: white;
+		font-family: Geneva, Arial, Helvetica, sans-serif;
+	}
+
+	ul { /* basic menu styling */
+		margin:		1ex 0;
+		padding:	0;
+		list-style:	none;
+		position:	relative;
+	}
+	li {
+		padding: 0.15em 1em 0.3em 5px;
+	}
+	
+	</style>
+	<script type="text/javascript" src="/skku/html/js/tmp/jquery.js"></script>
+	<script type="text/javascript" src="/skku/html/js/tmp/jquery.ui.all.js"></script>
+	<script type="text/javascript" src="/skku/html/js/tmp/jquery.layout.js"></script>
+
+	<script type="text/javascript">
+	var myLayout; // a var is required because this page utilizes: myLayout.allowOverflow() method
+	var context = "/skku";
+	$(document).ready(function () {
+
+		myLayout = $('body').layout({
+			west__size:					230
+		,	west__spacing_closed:		20
+		,	west__togglerLength_closed:	100
+		,	west__togglerAlign_closed:	"top"
+		,	west__togglerContent_closed:"개<BR>인<BR>정<BR>보"
+		,	west__togglerTip_closed:	"Open & Pin Menu"
+		,	west__sliderTip:			"Slide Open Menu"
+		,	west__slideTrigger_open:	"mouseover"
+		});
+
+ 	});
+	
+	function logout(code){
+		if(code != '999'){
+			if(!confirm("로그아웃 하시겠습니까?")){
+				return;
+			}
+		}
+		location.href= context + "/jsp/core/logout/logOut.jsp?flag=logout";
+	}
+	
+	
+	function sendMsg(){
+		var h = 700;
+		var w = 750;
+		var winl = (screen.width - w) / 2;
+		var wint = (screen.height - h) / 2;
+		winprops = 'height='+h+',width='+w+',top='+wint+',left='+winl+',scrollbars=yes';		
+		url = "https://docs.google.com/a/swit.co.kr/forms/d/1JafK0u2LWMX1Do-Z8swBqxL9y54mQPj4JMNnQw8rRMU/viewform";
+		win = window.open(url,"errorMsg",winprops);
+		if(parseInt(navigator.appVersion) >= 4 ) { win.window.focus(); }
+	}
+	function chgLang(lang){
+		location.href = context + "/core?attribute=frame&lang="+lang+"&fake="+new Date();
+	}
+	</script>
+</head>
+<body style="overflow: hidden; position: relative; height: 100%; margin: 0px; padding: 0px; border: none;">
+
+<iframe id="contentFrame" name="contentFrame" class="ui-layout-center ui-layout-pane ui-layout-pane-center open" width="100%" frameborder="0" scrolling="auto" src="SKKU-2018-12-01-TeamProject- Navigator_Frame-문재완.html" pane="center" style="visibility: visible; display: block; position: absolute; margin: 0px; z-index: 2; left: 236px; right: 0px; top: 0px; bottom: 0px; height: 918px; width: 776px;"></iframe>
+
+<div class="ui-layout-west ui-layout-pane ui-layout-pane-west open" pane="west" style="visibility: visible; display: block; position: absolute; margin: 0px; z-index: 2; left: 0px; right: auto; top: 0px; bottom: 0px; height: 918px; width: 208px;">
+	
+	
+	<table class="tableList3" width="230">
+	  	  
+	  	<tbody><tr height="56">
+			<td colspan="2" align="center">
+				<img src="/skku/html/images/login_logo2.png" width="180" valign="middle">
+			</td>
+		</tr>
+		
+	  	<tr bgcolor="#7CBC42">
+	    	<td colspan="2" height="50" align="center"><b><font color="#ffffff">2018 겨울계절수업</font></b></td>
+		</tr><tr>
+	  	</tr><tr>
+			<th>이름</th>
+			<td>문재완</td>
+		</tr>
+		<tr>
+			<th>학번</th>
+			<td>2017312554</td>
+		</tr>
+		<tr>
+			<th>학위과정</th>
+			<td>학사</td>
+		</tr>
+		<tr>
+			<th>학과(전공)</th>
+			<td>소프트웨어학과</td>
+		</tr>
+		<tr>
+			<th>등록예정학기수<br>(신청학년)</th>
+			<td>4&nbsp;(2)</td>
+		</tr>
+		<tr>
+			<th>신청가능학점</th>
+			<td>6 학점<br>
+			(이월학점 0포함)</td>
+		</tr>
+		<tr>
+			<th>신청가능일</th>
+			<td>2018-11-21~<br>2018-11-23</td>
+		</tr>
+	</tbody></table>
+	
+	
+</div>
+</body></html>

@@ -1,0 +1,507 @@
+<html><head>
+<meta charset="utf-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>수강신청</title>
+ 	<link rel="StyleSheet" href="/skku/html/css/style.css" type="text/css" title="myCSS">
+ 	<style>
+ 	.ui-dialog.message-dialog .ui-widget-header {
+	    background: #A6D9DC;
+	    border: 0;
+	    color: #fff;
+	    font-weight: normal;
+	}
+	.subgrid-cell .ui-helper-hidden { display: none}
+	.subview{font-weight: normal;margin-left:1.7cm;}
+	.normal {
+		color:blue;
+		font-weight: normal;		
+	}
+ 	</style>
+	<link rel="stylesheet" type="text/css" media="screen" href="/skku/html/css/redmond/jquery-ui-1.9.2.custom.min.css">
+	<link rel="stylesheet" type="text/css" media="screen" href="/skku/html/css/ui.jqgrid.css">
+	<style>
+	SELECT { COLOR: #555555; font-family: 굴림;Verdana, "Times New Roman";	font-size: 9pt; 	line-height: 140%;background-color:#F1F6CB;}
+	input {background-color:#F1F6CB;text-align:center;}
+	.ui-jqgrid tr.jqgrow td {
+	        word-wrap: break-word; /* IE 5.5+ and CSS3 */
+	        white-space: pre-wrap; /* CSS3 */
+	        white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+	        white-space: -pre-wrap; /* Opera 4-6 */
+	        white-space: -o-pre-wrap; /* Opera 7 */
+	        overflow: hidden;
+	        /*height: auto;*/
+	        vertical-align: middle;
+	        /*padding-top: 1px;
+	        padding-bottom: 1px*/
+	    }
+	    .ui-jqgrid .ui-jqgrid-htable th div
+        {
+			word-wrap: break-word; /* IE 5.5+ and CSS3 */
+			white-space: pre-wrap; /* CSS3 */
+			white-space: -pre-wrap; /* Opera 4-6 */
+			white-space: -o-pre-wrap; /* Opera 7 */
+			white-space: normal !important;
+			height: auto;
+			vertical-align: text-top;
+			padding-top: 2px;
+			padding-bottom: 3px;
+        }
+	    .ui-jqgrid .ui-jqgrid-bdiv{ overflow-x:hidden; }//좌우스크롤 없앰
+	    input[type="radio"]:checked+label{ color:red; }
+	</style>
+  <script type="text/javascript" src="/skku/html/js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="/skku/html/js/jquery.jqGrid.min.js"></script>
+  <script type="text/javascript" src="/skku/html/js/jquery-ui-1.9.2.custom.min.js"></script>
+  <script type="text/javascript" src="/skku/html/data/data.js?fake=Sat Dec 01 15:29:58 KST 2018" charset="utf-8"></script>
+  <script type="text/javascript" src="/skku/html/data/data_201825.js?fake=Sat Dec 01 15:29:58 KST 2018" charset="utf-8"></script>
+  <script type="text/javascript" src="/skku/html/js/netfunnel.js" charset="UTF-8"></script>
+  <script type="text/javascript">
+	var per = 0.98;
+	var maxHeight = 300;
+	var token = top.getToken();
+	var context = "/skku";
+	var saveUrl = context + "/sugang?attribute=sugangMode&token="+token;
+	var listUrl = context + "/sugang?attribute=sugangListJson&token="+token+"&fake=" + new Date();
+	
+    $(document).ready(function() {
+    	
+    });
+
+    function formatter(cellvalue, options, rowObject) {
+        i = options.rowId;
+		return "<span class='btn2 blue' onClick=choice('"+options.rowId+"','N')>학부   인정</span>"+"<br><span class='btn2 red' id='btnw'>대학원인정</span>";
+    }
+   	function choice(rowid,val){
+		var rowData  = jQuery("#listLecture").jqGrid('getRowData', rowid); 
+		
+		var params = rowData.params;
+		var lec_nm = rowData.gyogwamok_nm;
+        var siganpyo_yn = rowData.siganpyo_yn;
+        goMode(lec_nm,params+"@0@"+val,rowid,"insert");
+   	}
+   	
+    function goMode(lec_nm,params,rowid, mode){
+	   if(mode == "insert"){
+			NetFunnel_Action({service_id:"service_1", action_id:"act_2"},function(ev,ret){
+				okMode(lec_nm,params,rowid, mode);
+			});
+	   }else{
+			msgConfirm(lec_nm,params,rowid, mode);
+	   }
+	}
+   function okMode(lec_nm,params,rowid, mode){
+	   var menu = $("input[name=menu]:checked").val(); // 선택메뉴
+	   	$("#retake").dialog();
+		if($("#retake").dialog("isOpen")){
+			$("#retake").dialog("close");
+		}
+		$.ajax({
+    		type: "POST",
+    		url: saveUrl +"&mode="+mode+"&fake=" + new Date(),
+    		data:{params:params},
+    		async:false,
+    		success: function(data) {
+    			NetFunnel_Complete();
+				var tmp = eval("("+data+")");
+    			var code = tmp.code;
+    			var msg  = tmp.msg;
+    			if(code == "999"){
+    				logout(tmp.msg);
+    			}else if(code == "998"){
+    				initPage(msg);
+    			}else if(code == "100"){
+    				var str = msg;
+    				var res = str.split("@");
+    				if(!confirm(res[4])){
+    					return;
+    				}
+    				params = res[1]+"@"+res[2]+"@2@N@"+res[3];
+    				okMode('',params,rowid,'insert');
+    				
+        		}else if(code == "101"){
+    				var str = msg;
+    				var res = str.split("@");
+    				params = res[1]+"@"+res[2];
+					reTake(params,rowid);
+        		}else if(tmp.code == "MACRO"){
+					macroChk(params,rowid, mode);
+    			
+    			}else if(tmp.code == "200"){
+    				$("#retake").dialog();
+    				if($("#retake").dialog("isOpen")){
+						$("#retake").dialog("close");
+					}
+    				msgAlert(tmp.msg);
+    				if(mode == "insert"){
+    					$("#sugangData").trigger("reloadGrid");
+						if(menu == '0'){
+    						$("#listLecture").trigger("reloadGrid");
+						}
+    				}else{
+    					if(menu == '0'){
+    						$("#listLecture").trigger("reloadGrid");
+						}
+    					$("#sugangData").jqGrid('delRowData',rowid);
+    					$("#sugangData").trigger("reloadGrid");
+    				}
+					$("#gwamok").val("");
+					$("#ban").val("");
+    			}else{
+    				msgAlert(tmp.msg);
+    				return;
+    			}
+    		},
+    		error: function(req, status, error){
+    			NetFunnel_Complete();
+				alert("code:"+req.status+"\n"+"message:"+req.responseText+"\n"+"error:"+error);
+    		}
+    	});
+    }
+   function reTake(params, rowid){
+		$( "#retake" ).dialog({
+			position: 'center',
+			resizable: false,
+			position: ["top",100],
+			width: 600,
+			height: 'auto',
+			modal: true,
+			title:"재수강 대상과목",
+			resizable: false,
+	        beforeClose: function() {
+	            $("#gwamok").val("");
+	            $("#ban").val("");
+	            $(this).empty();
+	        },
+		    open: function(event, ui) {
+		     $('#retake').load(context + "/sugang?attribute=retake",{params:params,rowid:rowid,fake:new Date()}, function() {
+		     });
+		   }
+		}).prev(".ui-dialog-titlebar").css("background","#FFCCCC").css("color","#000");
+	}
+    function getCredit(val){
+    	var rowIDs = jQuery("#sugangData").jqGrid('getDataIDs');
+		var suHakjum = 0;
+		var suCnt	 = 0;
+		var bsHakjum = 0;
+		var bsCnt	 = 0;
+		var totCredit = 0;
+        for (var i = 0; i < rowIDs.length ; i++){
+            var rowID = rowIDs[i];
+            var rowData = jQuery('#sugangData').jqGrid ('getRowData', rowID);
+            if(rowData.sugangdaeki_gb == '2'){
+				bsHakjum += parseFloat(rowData.hakjum);
+				bsCnt++;
+			}else{
+				suHakjum += parseFloat(rowData.hakjum);
+            	suCnt++;
+			}
+        }
+        if(val == '1'){
+        	jQuery("#listSugang").jqGrid('setCaption',"수강신청 확정내역 [ 신청가능학점(이월학점0포함) : <font color='#f6ff00'>6학점</font> ] [ 신청학점 : <font color='#f6ff00'>"+suHakjum+"학점</font>, 신청과목수 : <font color='#f6ff00'>" + suCnt+"과목</font> ]</font>").trigger('reloadGrid');
+        	if(suCnt == 0){
+           	 $("#listSugang > tbody").append("<tr><td colspan='30' align='center' style='height:30px'><font color=blue>☞ 수강신청 내역이 없습니다.</font></td></tr>");
+           }		  
+        }/*else{
+        	var ment = "수강신청 대기내역 [ 대기학점 : <font color='#f6ff00'>"+bsHakjum+"학점</font>, 대기과목수 : <font color='#f6ff00'>" + bsCnt+"과목</font> ]</font>" +
+				"<div class=normal>- 수강신청 대기는 전공T/O만 운영합니다.<br>- 대기강좌 수강확정시 SMS 발송됩니다.(단, 통신사 사정상 미수신 될 수 있기 때문에 수강신청 사이트에서 최종 확인 요망)</div>";
+			jQuery("#listSugang2").jqGrid('setCaption',ment).trigger('reloadGrid');
+        	if(bsCnt == 0){
+           	 $("#listSugang2 > tbody").append("<tr><td colspan='30' align='center' style='height:30px'><font color=red>☞ 대기 신청 내역이 없습니다.</font></td></tr>");
+           }
+        }*/
+       winResize();
+    }
+    function fastSave(){
+    	var gwamok = $("#gwamok");
+    	var ban = $("#ban");
+    	if(gwamok.val() == ""){
+    		alert("학수번호를 입력하세요.");
+    		gwamok.focus();
+    		return;
+    	}
+    	if(gwamok.val().length < 7){
+    		alert("학수번호를 7자리의 입니다.");
+    		gwamok.focus();
+    		return;
+    	}
+    	if(ban.val() == ""){
+    		alert("분반을 입력하세요.");
+    		ban.focus();
+    		return;
+    	}
+    	if(ban.val().length < 2){
+    		alert("분반은 2자리 입니다.");
+    		ban.focus();
+    		return;
+    	}
+    	
+
+    	var params = gwamok.val() +"@"+ban.val();
+    	goMode(gwamok.val(),params,'','insert');	
+    }
+    function msgConfirm(lec_nm,params,rowid, mode){
+    	var temp = (mode == "insert") ? "신청":"삭제";
+		var msg = "["+lec_nm + "]을 " + temp + " 하시겠습니까?";
+		$("#msg").text(msg);
+    	$("#message").dialog({
+    		resizable: false,
+    		width: 400,
+    		height: 'auto',
+    		modal: true,
+    		closeOnEscape: false,
+    		resizable: false,
+            draggable: true,
+            buttons: {
+    			" 확인 ": function() {
+    				$( this ).dialog( "close" );
+					okMode(lec_nm,params,rowid, mode);
+					
+				},
+				" 닫기 ": function() {
+					$( this ).dialog( "close" );
+				}
+			}
+            
+    	});// end dialog
+    }
+    function msgAlert(msg){
+    	$("#msg").html(msg.replace(/\r|\n/gi,"<br>"));
+    	$("#message").dialog({
+    		resizable: false,
+    		width: 400,
+    		height: 'auto',
+    		modal: true,
+    		closeOnEscape: false,
+    		resizable: false,
+            draggable: true,
+            buttons: {
+				" close ": function() {
+					$( this ).dialog( "close" );
+				}
+			}
+            
+    	});
+    	  
+    }
+    function macroChk(params,rowid, mode){
+    	$("#macro").dialog({
+    		resizable: false,
+    		width: 550,
+    		height: 230,
+    		modal: true,
+    		closeOnEscape: false,
+    		resizable: false,
+            draggable: true,
+            open: function(event, ui) { 
+           		$(".ui-dialog-titlebar-close", $(this).parent()).hide();
+                $("#secNumber").focus();
+                $('#macro').load(context + "/sugang?attribute=macro",{params:params,rowid:rowid, mode:mode,fake:new Date()}, function() {
+                	$("#secNumber").focus()
+     				imgInit();
+     				initSize();// 화면 사이즈를 작게 했을 경우 입력 화면이 보이도록 조절
+     		     });
+    	    }
+    	});// end dialog
+    }
+	window.onload = function(){
+    	
+    	loadData();
+    }
+   function loadData(){
+	   $("#sugangData").jqGrid({
+	       	url : listUrl,
+			datatype: "json",
+			//width : 1000,
+			autowidth:true,
+			height : 'auto',
+			colNames:['수강삭제','대기정보','학수번호-분반','수강구분','교과목명','학점','교강사','전공구분','이수구분','수업시간/강의실','수업형태(언어)','캠퍼스','폐강','강좌정보','비고','분반','대기구분','param'],
+			colModel:[
+						{name:'mode',index:'mode',jsonmap:"mode", width:13, align:'center', formatter:function(){
+						    return "<span class='btn2 blue'>삭제</span>"}
+						},
+						{name:'state_nm',index:'state_nm', align:'center', width:12},
+						{name:'haksu_no',index:'haksu_no', width:18, align:'center'},
+						{name:'sugang_gb_nm',index:'sugang_gb_nm', width:12, align:'center'},
+						{name:'gyogwamok_nm',index:'gyogwamok_nm', width:25, align:'left'},
+						{name:'hakjum',index:'hakjum', width:10, align:'center'},
+						{name:'damdanggyosu_nm',index:'damdanggyosu_nm', width:12, align:'center'},
+						{name:'jungong_gb',index:'jungong_gb', width:12, align:'center'},
+						{name:'isu_gb',index:'isu_gb', width:12, align:'center'},
+						{name:'suup_yoil_gyosi',index:'suup_yoil_gyosi', width:30},
+						{name:'suup_hyungtae_cd',index:'suup_hyungtae_cd', width:18},
+						{name:'campus_nm',index:'campus_nm', width:10, align:'center'},
+						{name:'pyegang_gb',index:'pyegang_gb', width:10, align:'center'},
+						{name:'inform',index:'inform', width:10},
+						{name:'bigo',index:'bigo', width:10},
+						{name:'bunban',index:'bunban', hidden:true},
+						{name:'sugangdaeki_gb',index:'sugangdaeki_gb', hidden:true},
+						{name:'params',index:'params',jsonmap:"params", hidden:true}
+		            ],
+	       	
+	           rowNum: 50,
+	           rownumbers:true,
+	           gridview: true,
+	           caption: "수강신청 확정/대기내역",
+	           loadtext : "Loading ...",
+	           emptyrecords : "No data found.",
+	           cmTemplate: {sortable:false}, //sort를 못하도록
+	           onCellSelect:function(rowid,iCol,cellcontent,e){
+			    },
+		    loadComplete: function(){
+				
+				var rowIDs = jQuery("#sugangData").jqGrid('getDataIDs');
+		    	
+		        for (var i = 0; i < rowIDs.length ; i++){
+		            var rowID = rowIDs[i];
+		            var rowData = jQuery('#sugangData').jqGrid ('getRowData', rowID);
+					rowData.params = rowData.haksu_no + "@" + rowData.bunban;
+					rowData.haksu_no = rowData.haksu_no + "-" + rowData.bunban;
+					$('#sugangData').jqGrid('setRowData', rowID,rowData);
+		        }
+		       
+		        $("#listSugang").GridUnload();
+		        //$("#listSugang2").GridUnload();
+		        var sugangData = jQuery("#sugangData").jqGrid('getRowData');
+		        loadSugang(sugangData);		    	
+			}
+		});
+   }
+   function loadSugang(sugangData){
+	   $("#listSugang").jqGrid({
+	       	data : sugangData,
+			datatype: "local",
+			//width : 1000,
+			autowidth:true,
+			height : 'auto',
+			colNames:['수강삭제','대기정보','학수번호-분반','수강구분','교과목명','학점','교강사','전공구분','이수구분','수업시간/강의실','수업형태(언어)','캠퍼스','폐강여부','비고','분반','대기구분','param'],
+           colModel:[
+						{name:'mode',index:'mode',jsonmap:"mode", width:13, align:'center', formatter:function(){
+						    return "<span class='btn2 blue'>삭제</span>"}
+						},
+						{name:'state_nm',index:'state_nm', align:'center', width:12},
+						{name:'haksu_no',index:'haksu_no', width:18, align:'center'},
+						{name:'sugang_gb_nm',index:'sugang_gb_nm', width:12, align:'center'},
+						{name:'gyogwamok_nm',index:'gyogwamok_nm', width:25, align:'left'},
+						{name:'hakjum',index:'hakjum', width:10, align:'center'},
+						{name:'damdanggyosu_nm',index:'damdanggyosu_nm', width:12, align:'center'},
+						{name:'jungong_gb',index:'jungong_gb', width:12, align:'center'},
+						{name:'isu_gb',index:'isu_gb', width:12, align:'center'},
+						{name:'suup_yoil_gyosi',index:'suup_yoil_gyosi', width:30},
+						{name:'suup_hyungtae_cd',index:'suup_hyungtae_cd', width:18},
+						{name:'campus_nm',index:'campus_nm', width:10, align:'center'},
+						{name:'pyegang_gb',index:'pyegang_gb', width:10, align:'center'},
+						{name:'bigo',index:'bigo', width:10},
+						{name:'bunban',index:'bunban', hidden:true},
+						{name:'sugangdaeki_gb',index:'sugangdaeki_gb', hidden:true},
+						{name:'params',index:'params',jsonmap:"params", hidden:true}
+		            ],
+	       	
+	           rowNum: 50,
+	           rownumbers:true,
+	           gridview: true,
+	           caption: "수강신청 확정/대기내역",
+	           loadtext : "Loading ...",
+	           emptyrecords : "No data found.",
+	           cmTemplate: {sortable:false}, //sort를 못하도록
+	           onCellSelect:function(rowid,iCol,cellcontent,e){
+			    	var cm = jQuery("#listSugang").jqGrid('getGridParam', 'colModel');
+					var colName = cm[iCol];
+					var rowData  = jQuery("#listSugang").jqGrid('getRowData', rowid); 
+			        var params = rowData.params;
+			        var lec_nm = rowData.gyogwamok_nm;
+			        if(colName['index'] == 'mode'){
+				       goMode(lec_nm,params,rowid,"delete");
+			        }
+			       
+			    },
+		    loadComplete: function(){
+				$("#listSugang").closest("div.ui-jqgrid-view").children("div.ui-jqgrid-titlebar").css("background-color", "#072A60");
+		    	var rowIDs = jQuery("#listSugang").jqGrid('getDataIDs');
+		    	
+		        for (var i = 0; i < rowIDs.length ; i++){
+		            var rowID = rowIDs[i];
+		            var rowData = jQuery('#listSugang').jqGrid ('getRowData', rowID);
+					rowData.suup_yoil_gyosi = rowData.suup_yoil_gyosi.replace(/,/gi,'<br>');
+					$('#listSugang').jqGrid('setRowData', rowID,rowData);					
+		        }
+		    	getCredit('1');
+			}
+		});
+	   var grid = $("#listSugang");
+		var f = {groupOp: "AND", rules: []};
+	   	f.rules.push({field:"sugangdaeki_gb",op:"ne",data:'2'});
+	   	grid[0].p.search = f.rules.length>0;
+		$.extend(grid[0].p.postData,{filters:JSON.stringify(f)});
+		grid.trigger("reloadGrid",[{page:1}]);
+		//winResize();
+   }
+   function filterGrid(){
+		var grid = $("#listSugang");
+		var f = {groupOp: "AND", rules: []};
+	   	f.rules.push({field:"sugangdaeki_gb",op:"eq",data:'1'});
+	   	grid[0].p.search = f.rules.length>0;
+		$.extend(grid[0].p.postData,{filters:JSON.stringify(f)});
+		grid.trigger("reloadGrid",[{page:1}]);
+   }
+	
+    $(window).resize(function() {
+		winResize();
+		
+    });
+
+    function winResize(){
+	
+    	var menu = $("input[name=menu]:checked").val(); // 선택메뉴
+		if($("#listArea").height() > 300){
+    		$("#listArea").setGridHeight(maxHeight);
+    	}else{
+    		//$("#listArea").setGridHeight($("#listArea").height());
+    	}
+    	$("#listLecture").parents('div.ui-jqgrid-bdiv').css("max-height","300px");
+		var tmpWidth = $("#listArea").width()==null ? 0 : ($("#listArea").width() + 10);
+		$("#listLecture").setGridWidth($(window).width() * per - tmpWidth);
+		$("#listSugang").setGridWidth($(window).width() * per - tmpWidth);
+		if($("#listArea").length > 0){
+			//searchData();
+			$("#listSugang").setGridWidth($(window).width() * per);
+		}
+		
+    }
+    function logout(msg){
+		alert(msg);
+    	location.href="/skku/jsp/core/logout/logOut.jsp?flag=logout";
+   	}
+     function initPage(msg){
+		alert(msg);
+    	top.location.href = "http://sugang.skku.edu:80/skku/";
+   	}
+    </script>
+     
+ 
+</head>
+<body style="">
+<div id="message" title="알림" style="display:none;"><table align="center"><tbody><tr><td valign="bottom"><div id="msg" style="font-size:9;font-color:black;"></div></td></tr></tbody></table></div>
+<div id="retake" title="재수강 대상 과목조회" style="display:none;"></div>
+<div id="macro" title="매크로 방지용 키입력" style="display:none;"></div>
+<input type="hidden" id="oldMenu">
+<input type="hidden" id="isClick">
+
+<table border="0" align="center">
+
+	<tbody><tr>
+		<td valign="middle"><b>▶ 학수번호-분반 : </b><input type="text" name="gwamok" id="gwamok" size="10" maxlength="7">-<input type="text" name="ban" id="ban" size="4" maxlength="2" onkeydown="if(event.keyCode == 13) fastSave();">&nbsp;&nbsp;&nbsp;<span class="btn2 blue" onclick="fastSave()">수강신청</span></td>
+	</tr>
+	<tr valign="top">
+		<td colspan="2"><div class="ui-jqgrid ui-widget ui-widget-content ui-corner-all" id="gbox_listSugang" dir="ltr" style="width: 760px;"><div class="ui-widget-overlay jqgrid-overlay" id="lui_listSugang"></div><div class="loading ui-state-default ui-state-active" id="load_listSugang" style="display: none;">Loading ...</div><div class="ui-jqgrid-view" id="gview_listSugang" style="width: 760px;"><div class="ui-jqgrid-titlebar ui-jqgrid-caption ui-widget-header ui-corner-top ui-helper-clearfix" style="background-color: rgb(7, 42, 96);"><a role="link" class="ui-jqgrid-titlebar-close ui-corner-all HeaderButton" style="right: 0px;"><span class="ui-icon ui-icon-circle-triangle-n"></span></a><span class="ui-jqgrid-title">수강신청 확정내역 [ 신청가능학점(이월학점0포함) : <font color="#f6ff00">6학점</font> ] [ 신청학점 : <font color="#f6ff00">0학점</font>, 신청과목수 : <font color="#f6ff00">0과목</font> ]</span></div><div class="ui-state-default ui-jqgrid-hdiv" style="width: 760px;"><div class="ui-jqgrid-hbox"><table class="ui-jqgrid-htable" style="width: 759px;" role="grid" aria-labelledby="gbox_listSugang" cellspacing="0" cellpadding="0" border="0"><thead><tr class="ui-jqgrid-labels" role="rowheader"><th id="listSugang_rn" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 25px;"><div id="jqgh_listSugang_rn"><span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_mode" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 42px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_mode" class="ui-jqgrid-sortable">수강삭제<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_state_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 39px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_state_nm" class="ui-jqgrid-sortable">대기정보<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_haksu_no" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 58px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_haksu_no" class="ui-jqgrid-sortable">학수번호-분반<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_sugang_gb_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 39px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_sugang_gb_nm" class="ui-jqgrid-sortable">수강구분<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_gyogwamok_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 81px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_gyogwamok_nm" class="ui-jqgrid-sortable">교과목명<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_hakjum" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 32px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_hakjum" class="ui-jqgrid-sortable">학점<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_damdanggyosu_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 39px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_damdanggyosu_nm" class="ui-jqgrid-sortable">교강사<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_jungong_gb" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 39px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_jungong_gb" class="ui-jqgrid-sortable">전공구분<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_isu_gb" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 39px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_isu_gb" class="ui-jqgrid-sortable">이수구분<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_suup_yoil_gyosi" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 97px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_suup_yoil_gyosi" class="ui-jqgrid-sortable">수업시간/강의실<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_suup_hyungtae_cd" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 58px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_suup_hyungtae_cd" class="ui-jqgrid-sortable">수업형태(언어)<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_campus_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 32px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_campus_nm" class="ui-jqgrid-sortable">캠퍼스<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_pyegang_gb" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 32px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_pyegang_gb" class="ui-jqgrid-sortable">폐강여부<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_bigo" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 32px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_bigo" class="ui-jqgrid-sortable">비고<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_bunban" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 150px; display: none;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_bunban" class="ui-jqgrid-sortable">분반<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_sugangdaeki_gb" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 150px; display: none;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_sugangdaeki_gb" class="ui-jqgrid-sortable">대기구분<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="listSugang_params" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 150px; display: none;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_listSugang_params" class="ui-jqgrid-sortable">param<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th></tr></thead></table></div></div><div class="ui-jqgrid-bdiv" style="height: auto; width: 760px;"><div style="position:relative;"><div></div><table id="listSugang" tabindex="0" cellspacing="0" cellpadding="0" border="0" role="grid" aria-multiselectable="false" aria-labelledby="gbox_listSugang" class="ui-jqgrid-btable" style="width: 759px;"><tbody><tr class="jqgfirstrow" role="row" style="height:auto"><td role="gridcell" style="height:0px;width:25px;"></td><td role="gridcell" style="height: 0px; width: 42px;"></td><td role="gridcell" style="height: 0px; width: 39px;"></td><td role="gridcell" style="height: 0px; width: 58px;"></td><td role="gridcell" style="height: 0px; width: 39px;"></td><td role="gridcell" style="height: 0px; width: 81px;"></td><td role="gridcell" style="height: 0px; width: 32px;"></td><td role="gridcell" style="height: 0px; width: 39px;"></td><td role="gridcell" style="height: 0px; width: 39px;"></td><td role="gridcell" style="height: 0px; width: 39px;"></td><td role="gridcell" style="height: 0px; width: 97px;"></td><td role="gridcell" style="height: 0px; width: 58px;"></td><td role="gridcell" style="height: 0px; width: 32px;"></td><td role="gridcell" style="height: 0px; width: 32px;"></td><td role="gridcell" style="height: 0px; width: 32px;"></td><td role="gridcell" style="height:0px;width:150px;display:none;"></td><td role="gridcell" style="height:0px;width:150px;display:none;"></td><td role="gridcell" style="height:0px;width:150px;display:none;"></td></tr><tr><td colspan="30" align="center" style="height:30px"><font color="blue">☞ 수강신청 내역이 없습니다.</font></td></tr></tbody></table></div></div></div><div class="ui-jqgrid-resize-mark" id="rs_mlistSugang">&nbsp;</div></div><div id="scomment" style="display:none;text-align:center;height:30;width:300;"></div></td>
+	</tr>
+</tbody></table>
+<div id="hiddenData" style="display:none;">
+<div class="ui-jqgrid ui-widget ui-widget-content ui-corner-all" id="gbox_sugangData" dir="ltr" style="width: 319px;"><div class="ui-widget-overlay jqgrid-overlay" id="lui_sugangData"></div><div class="loading ui-state-default ui-state-active" id="load_sugangData" style="display: none;">Loading ...</div><div class="ui-jqgrid-view" id="gview_sugangData" style="width: 319px;"><div class="ui-jqgrid-titlebar ui-jqgrid-caption ui-widget-header ui-corner-top ui-helper-clearfix"><a role="link" class="ui-jqgrid-titlebar-close ui-corner-all HeaderButton" style="right: 0px;"><span class="ui-icon ui-icon-circle-triangle-n"></span></a><span class="ui-jqgrid-title">수강신청 확정/대기내역</span></div><div class="ui-state-default ui-jqgrid-hdiv" style="width: 319px;"><div class="ui-jqgrid-hbox"><table class="ui-jqgrid-htable" style="width:319px" role="grid" aria-labelledby="gbox_sugangData" cellspacing="0" cellpadding="0" border="0"><thead><tr class="ui-jqgrid-labels" role="rowheader"><th id="sugangData_rn" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 25px;"><div id="jqgh_sugangData_rn"><span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_mode" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 13px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_mode" class="ui-jqgrid-sortable">수강삭제<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_state_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 12px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_state_nm" class="ui-jqgrid-sortable">대기정보<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_haksu_no" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 18px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_haksu_no" class="ui-jqgrid-sortable">학수번호-분반<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_sugang_gb_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 12px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_sugang_gb_nm" class="ui-jqgrid-sortable">수강구분<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_gyogwamok_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 25px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_gyogwamok_nm" class="ui-jqgrid-sortable">교과목명<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_hakjum" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 10px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_hakjum" class="ui-jqgrid-sortable">학점<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_damdanggyosu_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 12px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_damdanggyosu_nm" class="ui-jqgrid-sortable">교강사<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_jungong_gb" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 12px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_jungong_gb" class="ui-jqgrid-sortable">전공구분<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_isu_gb" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 12px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_isu_gb" class="ui-jqgrid-sortable">이수구분<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_suup_yoil_gyosi" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 30px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_suup_yoil_gyosi" class="ui-jqgrid-sortable">수업시간/강의실<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_suup_hyungtae_cd" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 18px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_suup_hyungtae_cd" class="ui-jqgrid-sortable">수업형태(언어)<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_campus_nm" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 10px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_campus_nm" class="ui-jqgrid-sortable">캠퍼스<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_pyegang_gb" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 10px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_pyegang_gb" class="ui-jqgrid-sortable">폐강<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_inform" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 10px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_inform" class="ui-jqgrid-sortable">강좌정보<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_bigo" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 10px;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_bigo" class="ui-jqgrid-sortable">비고<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_bunban" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 150px; display: none;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_bunban" class="ui-jqgrid-sortable">분반<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_sugangdaeki_gb" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 150px; display: none;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_sugangdaeki_gb" class="ui-jqgrid-sortable">대기구분<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th><th id="sugangData_params" role="columnheader" class="ui-state-default ui-th-column ui-th-ltr" style="width: 150px; display: none;"><span class="ui-jqgrid-resize ui-jqgrid-resize-ltr" style="cursor: col-resize;">&nbsp;</span><div id="jqgh_sugangData_params" class="ui-jqgrid-sortable">param<span class="s-ico" style="display:none"><span sort="asc" class="ui-grid-ico-sort ui-icon-asc ui-state-disabled ui-icon ui-icon-triangle-1-n ui-sort-ltr"></span><span sort="desc" class="ui-grid-ico-sort ui-icon-desc ui-state-disabled ui-icon ui-icon-triangle-1-s ui-sort-ltr"></span></span></div></th></tr></thead></table></div></div><div class="ui-jqgrid-bdiv" style="height: auto; width: 319px;"><div style="position:relative;"><div></div><table id="sugangData" tabindex="0" cellspacing="0" cellpadding="0" border="0" role="grid" aria-multiselectable="false" aria-labelledby="gbox_sugangData" class="ui-jqgrid-btable" style="width: 319px;"><tbody><tr class="jqgfirstrow" role="row" style="height:auto"><td role="gridcell" style="height:0px;width:25px;"></td><td role="gridcell" style="height:0px;width:13px;"></td><td role="gridcell" style="height:0px;width:12px;"></td><td role="gridcell" style="height:0px;width:18px;"></td><td role="gridcell" style="height:0px;width:12px;"></td><td role="gridcell" style="height:0px;width:25px;"></td><td role="gridcell" style="height:0px;width:10px;"></td><td role="gridcell" style="height:0px;width:12px;"></td><td role="gridcell" style="height:0px;width:12px;"></td><td role="gridcell" style="height:0px;width:12px;"></td><td role="gridcell" style="height:0px;width:30px;"></td><td role="gridcell" style="height:0px;width:18px;"></td><td role="gridcell" style="height:0px;width:10px;"></td><td role="gridcell" style="height:0px;width:10px;"></td><td role="gridcell" style="height:0px;width:10px;"></td><td role="gridcell" style="height:0px;width:10px;"></td><td role="gridcell" style="height:0px;width:150px;display:none;"></td><td role="gridcell" style="height:0px;width:150px;display:none;"></td><td role="gridcell" style="height:0px;width:150px;display:none;"></td></tr></tbody></table></div></div></div><div class="ui-jqgrid-resize-mark" id="rs_msugangData">&nbsp;</div></div>
+</div>
+<div id="pager"></div>
+ <div id="ptoolbar"></div>
+ <div id="plan"></div>
+
+</body></html>
