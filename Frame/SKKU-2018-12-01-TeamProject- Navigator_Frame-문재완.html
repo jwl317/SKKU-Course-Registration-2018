@@ -1,0 +1,77 @@
+<html><head>
+<meta http-equiv="X-UA-Compatible" content="IE=8">
+<link rel="StyleSheet" href="/skku/html/css/style.css" type="text/css" title="myCSS">
+<link rel="stylesheet" type="text/css" href="/skku/html/css/tab.css">
+<link rel="stylesheet" href="/skku/html/css/redmond/jquery-ui-1.9.2.custom.min.css">
+<script language="JavaScript" src="/skku/html/js/jquery-1.8.3.js"></script>
+<script src="/skku/html/js/jquery-ui-1.9.2.custom.min.js"></script>
+<script language="javascript">
+var context = "/skku";
+function goMenu(div){	
+	var url;
+	switch(div){
+		case '0' : url = '/core?attribute=notice'; break;
+		case '1' : url = '/sugang?attribute=giganChk'; break;
+		case '2' : url = '/sugang?attribute=sugangView'; break;
+	}
+	
+	if(div == '1'){
+		$.ajax({
+			type: "POST",
+			url: context + url +"&fake=" + new Date(),
+			async:false,
+			success: function(data) {
+				var tmp = eval("("+data+")");
+				if(tmp.code == "999"){
+					alert(tmp.msg);
+					parent.parent.logout(tmp.code);
+				}else if(tmp.code == "200"){
+					goUrl(tmp.msg, div);
+				}else{						
+					alert(tmp.msg);
+					top.msgAlert(tmp.msg);
+					return;	
+				}
+			},
+			error: function(req, status, error){
+				alert("code:"+req.status+"\n"+"message:"+req.responseText+"\n"+"error:"+error);
+			}
+		});
+	}else if(div == '3'){
+		logout();	
+	}else{
+		goUrl(url, div);
+	}
+}
+
+function goUrl(url,div){
+	$("ul li").removeClass('active');
+	  $("ul li").each(function(){
+		$("ul li").eq(div).addClass('active');
+	  });
+	 parent.mainFrame.location.href =  context + url + "&token=" + top.getToken() + "&fake="+new Date();
+}
+
+window.onload = function(){
+	goMenu('0');
+}
+
+function logout(){
+	parent.parent.logout();
+}
+
+</script>
+</head>
+<body bgcolor="#F3F3F3">
+<div id="cssmenu">
+<ul>
+	<li class=""><a href="javascript:goMenu('0');"><span>공지사항</span></a></li>
+	
+	<li class=""><a href="javascript:goMenu('1');"><span>수강신청</span></a></li>
+	<li class="active"><a href="javascript:goMenu('2');"><span>수강신청확정내역/대기내역 조회</span></a></li>
+	<li><a href="javascript:goMenu('3');"><span>로그아웃</span></a></li>
+	
+</ul>
+</div>
+
+</body></html>
