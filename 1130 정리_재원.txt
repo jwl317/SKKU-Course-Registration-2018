@@ -1,20 +1,43 @@
-1. css menu¸¦ µû·Î ¸¸µé¾î Àû¿ë
+í•™êµ ìˆ˜ê°•ì‚¬ì´íŠ¸
+íƒ­ í”„ë ˆì„:
+>>> tab.css
+
+ë©”ì¸ í”„ë ˆì„: ìƒìœ„ íƒ­ê³¼ ì‚¬ì´ë“œ ë°”ë¥¼ ì œì™¸í•œ ë‚˜ë¨¸ì§€ ë°”ë”” í”„ë ˆì„
+	css menuë¥¼ ë”°ë¡œ ë§Œë“¤ì–´ì„œ ì ìš©í•´ì„œ ì‚¬ìš©í•˜ê³  ìˆë‹¤
+	>>> style.css //<head>, <iframe> íƒ­, ì‚¬ì´ë“œ, ë©”ì¸ ë‹¤ í¬í•¨í•œ ì „ì²´ í”„ë ˆì„, <frame> ì‚¬ì´ë“œ ì œì™¸í•˜ê³  íƒ­ê³¼ ë©”ì¸ë§Œ í¬í•¨í•œ í”„ë ˆì„,  
+	>>> ui.jqgrid.css
+
+	ê·¸ë¦¬ê³  jQueryë¥¼ ê¸°ë³¸ìœ¼ë¡œ í•˜ë©´ì„œ ë·°ë¥¼ í‘œí˜„í•˜ëŠ” ë‹¤ì–‘í•œ ì»´í¬ë„ŒíŠ¸, ìœ„ì ¯ì„ ëª¨ì•„ì„œ ì •ë¦¬í•œ UI ë„ ì‚¬ìš©í•˜ê³  ìˆë‹¤
+	ë” ìì„¸í•œ ì‚¬í•­ì€ http://jqueryui.com ì°¸ê³ í•œë‹¤
+	>>> jquery-ui-1.9.2.custom.min.css
+	>>> jquery.jqGrid.min.js
+
+ëŒ€ë‹¤ìˆ˜ "êµ¬ê¸€ í°íŠ¸ ì ìš©"í–ˆëŠ”ë°, ì •í™•íˆ ì–´ë–¤ í°íŠ¸ì¸ì§€ ì˜ ëª¨ë¥´ê² ë‹¤
+font-family ê°€ ë‹¤ ê¹¨ì ¸ì„œ ë³´ì¸ë‹¤
+ì•„ë§ˆë„ "Trebuchet MS", sans-serif
+
+
+1. css menuë¥¼ ë”°ë¡œ ë§Œë“¤ì–´ ì ìš©
 	<link rel="StyleSheet" href="/skku/html/css/style.css" type="text/css" title="myCSS">
 	<link rel="stylesheet" type="text/css" href="/skku/html/css/tab.css">
 	<link rel="stylesheet" href="/skku/html/css/redmond/jquery-ui-1.9.2.custom.min.css">
 
-2. jqGrid ´Â jQuery UI Å×¸¶¶û ¿¬µ¿ÀÌ µÇ´Â°Å °°´Ù
-¹«·á ±×¸®µåÁß¿¡¼­´Â jqGrid°¡ À¯¸íÇÑ°Å 
-jqGrid API ¹®¼­°â µ¥¸ğÆäÀÌÁö Á¦°ø ±â´ÉµéÀÌ ¾öÃ»³ª´Ù
-»ùÇÃ¸µÀ¸·Î jqGrid¿¡¼­ µ¥¸ğ¿Í ¼Ò½º¸¦ Á¦°ø
+2. jqGrid ëŠ” jQuery UI í…Œë§ˆë‘ ì—°ë™ì´ ë˜ëŠ”ê±° ê°™ë‹¤
+ë¬´ë£Œ ê·¸ë¦¬ë“œì¤‘ì—ì„œëŠ” jqGridê°€ ìœ ëª…í•œê±° 
+jqGrid API ë¬¸ì„œê²¸ ë°ëª¨í˜ì´ì§€ ì œê³µ ê¸°ëŠ¥ë“¤ì´ ì—„ì²­ë‚˜ë‹¤
+ìƒ˜í”Œë§ìœ¼ë¡œ jqGridì—ì„œ ë°ëª¨ì™€ ì†ŒìŠ¤ë¥¼ ì œê³µ
 >>>	http://trirand.com/blog/jqgrid/jqgrid.html
 
-ÃâÃ³: http://roqkffhwk.tistory.com/43 [¾ß±Ù½È¾îÇÏ´Â °³¹ßÀÚ]
+ì¶œì²˜: http://roqkffhwk.tistory.com/43 [ì•¼ê·¼ì‹«ì–´í•˜ëŠ” ê°œë°œì]
 
 
-3. jQueryUI´Â jQuery¸¦ ±âº»À¸·Î ÇÏ¸é¼­ ºä¸¦ Ç¥ÇöÇÏ´Â ´Ù¾çÇÑ ÄÄÆ÷³ÍÆ®, À§Á¬À» ¸ğ¾Æ³õÀº User Interface¸¦ ¸ğ¾Æ ³õÀº °Í
+3. jQueryUIëŠ” jQueryë¥¼ ê¸°ë³¸ìœ¼ë¡œ í•˜ë©´ì„œ ë·°ë¥¼ í‘œí˜„í•˜ëŠ” ë‹¤ì–‘í•œ ì»´í¬ë„ŒíŠ¸, ìœ„ì ¯ì„ ëª¨ì•„ë†“ì€ User Interfaceë¥¼ ëª¨ì•„ ë†“ì€ ê²ƒ
+jQuery UI is a curated set of user interface interactions, effects, widgets, and themes built on top of the jQuery JavaScript Library.
 
 	<script language="JavaScript" src="/skku/html/js/jquery-1.8.3.js"></script>
 	<script src="/skku/html/js/jquery-ui-1.9.2.custom.min.js"></script>
 
-ÃâÃ³: http://mobicon.tistory.com/376 [Intelligence Data Visualization]
+ì¶œì²˜: http://mobicon.tistory.com/376 [Intelligence Data Visualization]
+
+
+
